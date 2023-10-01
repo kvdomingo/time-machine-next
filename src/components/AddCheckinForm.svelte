@@ -7,7 +7,7 @@
     isAdding = true;
   }
 
-  function onSubmit(
+  async function onSubmit(
     event: Event & { currentTarget: EventTarget & HTMLFormElement },
   ) {
     event.preventDefault();
@@ -32,9 +32,17 @@
       },
     );
     const checkinForm = CheckinForm.parse(form);
-    console.log(checkinForm);
 
-    isAdding = false;
+    try {
+      const res = await fetch("?/create", {
+        method: "POST",
+        body: JSON.stringify(checkinForm),
+      });
+      console.log(await res.json());
+      isAdding = false;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   function onReset() {
@@ -75,6 +83,7 @@
       <input
         name="duration"
         type="number"
+        step="0.01"
         placeholder="Duration"
         class="input input-bordered input-ghost"
       />

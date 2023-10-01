@@ -1,17 +1,15 @@
 <script lang="ts">
   import dateFormat from "dateformat";
+
+  import type { PageData } from "./$types";
+
   import AddCheckinForm from "@/components/AddCheckinForm.svelte";
 
   const now = new Date();
   const today = dateFormat(now, "dddd, d mmmm yyyy");
 
-  const checkins: { duration: number; tag: string; activity: string }[] = [
-    {
-      duration: 1,
-      tag: "unicef-giga",
-      activity: "dev",
-    },
-  ];
+  export let data: PageData;
+  const { checkins = [] } = data;
 </script>
 
 <main class="min-h-screen bg-gradient-to-b from-indigo-900 to-indigo-950">
