@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family:
+    "Figtree",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI Variable",
+    ui-sans-serif,
+    sans-serif;
+  font-size: 14pt;
+  color: white;
+}
+
+h6 {
+  font-size: theme("fontSize.md");
+}
+
+h5 {
+  font-size: theme("fontSize.lg");
+}
+
+h4 {
+  font-size: theme("fontSize.xl");
+}
+
+h3 {
+  font-size: theme("fontSize.2xl");
+}
+
+h2 {
+  font-size: theme("fontSize.3xl");
+}
+
+h1 {
+  font-size: theme("fontSize.4xl");
+}
+
+small {
+  font-size: theme("fontSize.sm");
+}

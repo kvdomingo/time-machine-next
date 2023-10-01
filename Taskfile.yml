@@ -1,0 +1,20 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: time-machine-next
+
+dotenv:
+  - .env
+
+tasks:
+  makemigrations:
+    cmds:
+      - |
+        atlas migrate diff {{.CLI_ARGS}} \
+        --dir file://migrations \
+        --to file://src/db/schema.lt.hcl \
+        --dev-url sqlite://dev.db.sqlite3
+
+  migrate:
+    cmds:
+      - atlas migrate apply --dir file://migrations --url sqlite://db.sqlite3
