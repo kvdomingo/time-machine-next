@@ -5,19 +5,13 @@
   import "@fontsource/figtree/500.css";
   import "@fontsource/figtree/700.css";
   import "@/styles/base.css";
-  import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
+  import { QueryClientProvider } from "@tanstack/svelte-query";
 
-  import { browser } from "$app/environment";
+  import type { PageData } from "./$types";
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        enabled: browser,
-      },
-    },
-  });
+  export let data: PageData;
 </script>
 
-<QueryClientProvider client={queryClient}>
+<QueryClientProvider client={data.queryClient}>
   <slot />
 </QueryClientProvider>

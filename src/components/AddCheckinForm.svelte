@@ -1,11 +1,48 @@
 <script lang="ts">
+  import { createMutation, useQueryClient } from "@tanstack/svelte-query";
+  import dateFormat from "dateformat";
+  import dayjs from "dayjs";
+
+  import { api } from "$lib/api";
   import { CheckinForm } from "@/types/checkin";
 
+  const queryClient = useQueryClient();
+
   let isAdding = false;
+
+  let recordDate: string = dateFormat(new Date(), "yyyy-mm-dd");
+  let startTime: string = dateFormat(new Date(), "HH:MM");
+  let endTime: string = dateFormat(new Date(), "HH:MM");
+  let duration: number = 0;
 
   function onClick() {
     isAdding = true;
   }
+
+  function onChangeDuration() {
+    endTime = dateFormat(
+      dayjs(new Date(`${recordDate} ${startTime}`))
+        .add(duration, "hours")
+        .toDate(),
+      "HH:MM",
+    );
+  }
+
+  function onChangeStartTime() {}
+
+  function onChangeEndTime() {
+    duration =
+      (dayjs(new Date(`${recordDate} ${endTime}`)).valueOf() -
+        dayjs(new Date(`${recordDate} ${startTime}`)).valueOf()) /
+      1000 /
+      60 /
+      60;
+  }
+
+  const mutation = createMutation({
+    mutationKey: ["checkin"],
+    mutationFn: api.checkins.create,
+  });
 
   async function onSubmit(
     event: Event & { currentTarget: EventTarget & HTMLFormElement },
@@ -21,11 +58,13 @@
     (Object.entries(originalForm) as [keyof CheckinForm, string][]).forEach(
       ([key, value]) => {
         if (key === "recordDate") {
-          form[key] = new Date(value);
+          form[key] = new Date(value).toISOString();
         } else if (key === "duration") {
           form[key] = parseFloat(value);
         } else if (key === "startTime") {
-          form[key] = new Date(`${originalForm.recordDate} ${value}`);
+          form[key] = new Date(
+            `${originalForm.recordDate} ${value}`,
+          ).toISOString();
         } else {
           form[key] = value;
         }
@@ -33,16 +72,15 @@
     );
     const checkinForm = CheckinForm.parse(form);
 
-    try {
-      const res = await fetch("?/create", {
-        method: "POST",
-        body: JSON.stringify(checkinForm),
-      });
-      console.log(await res.json());
-      isAdding = false;
-    } catch (e) {
-      console.error(e);
-    }
+    $mutation.mutate(checkinForm, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["checkins"] });
+        isAdding = false;
+      },
+      onError: e => {
+        console.error(e);
+      },
+    });
   }
 
   function onReset() {
@@ -58,6 +96,7 @@
         type="date"
         placeholder="Record date"
         class="input input-bordered input-ghost"
+        bind:value={recordDate}
       />
       <input
         name="tag"
@@ -74,11 +113,15 @@
         type="time"
         placeholder="Start time"
         class="input input-bordered input-ghost"
+        bind:value={startTime}
+        on:change={onChangeStartTime}
       />
       <input
         type="time"
         placeholder="End time"
         class="input input-bordered input-ghost"
+        bind:value={endTime}
+        on:change={onChangeEndTime}
       />
       <input
         name="duration"
@@ -86,6 +129,8 @@
         step="0.01"
         placeholder="Duration"
         class="input input-bordered input-ghost"
+        bind:value={duration}
+        on:change={onChangeDuration}
       />
       <button type="reset" class="btn btn-circle btn-primary btn-ghost btn-sm">
         ✖

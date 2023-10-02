@@ -1,15 +1,38 @@
 <script lang="ts">
+  import {
+    createMutation,
+    createQuery,
+    useQueryClient,
+  } from "@tanstack/svelte-query";
   import dateFormat from "dateformat";
 
-  import type { PageData } from "./$types";
-
+  import { api } from "$lib/api";
   import AddCheckinForm from "@/components/AddCheckinForm.svelte";
 
   const now = new Date();
   const today = dateFormat(now, "dddd, d mmmm yyyy");
 
-  export let data: PageData;
-  const { checkins = [] } = data;
+  const queryClient = useQueryClient();
+
+  const query = createQuery({
+    queryKey: ["checkins"],
+    queryFn: api.checkins.list,
+  });
+
+  const mutation = createMutation({
+    mutationKey: ["checkin"],
+    mutationFn: api.checkins.delete,
+  });
+
+  function onDelete(id: string) {
+    $mutation.mutate(id, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["checkins"] });
+      },
+    });
+  }
+
+  $: checkins = $query.data?.data ?? [];
 </script>
 
 <main class="min-h-screen bg-gradient-to-b from-indigo-900 to-indigo-950">
@@ -28,10 +51,20 @@
         </li>
       {:else}
         {#each checkins as checkin}
-          <li class="border-t px-4 py-2">
-            {checkin.duration.toFixed(2)} hr{checkin.duration === 1 ? "" : "s"}
-            #{checkin.tag}
-            {checkin.activity}
+          <li class="flex justify-between border-t px-4 py-2">
+            <div class="flex items-center">
+              {checkin.duration.toFixed(2)} hr{checkin.duration === 1
+                ? ""
+                : "s"}
+              <button class="btn btn-primary btn-ghost btn-sm lowercase">
+                #{checkin.tag}
+              </button>
+              {checkin.activity}
+            </div>
+            <button
+              class="btn btn-circle btn-error btn-ghost btn-sm"
+              on:click={() => onDelete(checkin.id)}>🗑</button
+            >
           </li>
         {/each}
       {/if}
