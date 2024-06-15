@@ -7,6 +7,11 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { init } from "@paralleldrive/cuid2";
+
+const createId = init({
+  length: 24,
+});
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -14,7 +19,9 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = sqliteTableCreator((name) => `time-machine-next_${name}`);
+export const createTable = sqliteTableCreator(
+  (name) => `time-machine-next_${name}`,
+);
 
 export const posts = createTable(
   "post",
@@ -32,11 +39,11 @@ export const posts = createTable(
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
 
 export const users = createTable("user", {
-  id: text("id", { length: 255 }).notNull().primaryKey(),
+  id: text("id", { length: 24 }).notNull().primaryKey().$defaultFn(createId),
   name: text("name", { length: 255 }),
   email: text("email", { length: 255 }).notNull(),
   emailVerified: int("emailVerified", {
@@ -52,7 +59,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = createTable(
   "account",
   {
-    userId: text("userId", { length: 255 })
+    userId: text("userId", { length: 24 })
       .notNull()
       .references(() => users.id),
     type: text("type", { length: 255 })
@@ -73,7 +80,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_userId_idx").on(account.userId),
-  })
+  }),
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -84,14 +91,14 @@ export const sessions = createTable(
   "session",
   {
     sessionToken: text("sessionToken", { length: 255 }).notNull().primaryKey(),
-    userId: text("userId", { length: 255 })
+    userId: text("userId", { length: 24 })
       .notNull()
       .references(() => users.id),
     expires: int("expires", { mode: "timestamp" }).notNull(),
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  })
+  }),
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -107,5 +114,5 @@ export const verificationTokens = createTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
+  }),
 );
