@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   int,
+  real,
   primaryKey,
   sqliteTableCreator,
   text,
@@ -116,3 +117,16 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+export const checkin = createTable("checkin", {
+  id: text("id", { length: 24 }).notNull().primaryKey().$defaultFn(createId),
+  created: int("created", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updated: int("updated", { mode: "timestamp" }),
+  duration: real("duration"),
+  start_time: text("start_time", { length: 5 }),
+  record_date: text("record_date", { length: 10 }),
+  tag: text("tag", { length: 255 }),
+  activities: text("activities", { length: 255 }),
+});
