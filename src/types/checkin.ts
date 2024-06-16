@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CreateCheckinSchema = z.object({
-  duration: z.number().gt(0),
+  duration: z.coerce.number().gt(0),
   start_time: z.string().length(5),
   record_date: z.string().length(10),
   tag: z.string().min(1),
