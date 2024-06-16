@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "de66be41-b0b4-4709-a2a2-29d6cc031ed9",
+  "id": "1b0a57ab-7b79-40ec-9693-2d6ddc748fa3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "time-machine-next_account": {

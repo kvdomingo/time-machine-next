@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { api } from "@/trpc/react";
 import { CreateCheckinSchema } from "@/types/checkin";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +28,10 @@ import {
 
 export default function CreateCheckin() {
   const [endTime, setEndTime] = useState(format(new Date(), "HH:mm"));
+
+  const { mutateAsync } = api.checkin.create.useMutation({
+    mutationKey: ["checkin", "create"],
+  });
 
   const form = useForm({
     resolver: zodResolver(CreateCheckinSchema),
@@ -75,8 +80,8 @@ export default function CreateCheckin() {
     setEndTime(format(delta, "HH:mm"));
   }
 
-  function onSubmit(values: CreateCheckinSchema) {
-    console.log(values);
+  async function onSubmit(values: CreateCheckinSchema) {
+    await mutateAsync(values);
   }
 
   function onReset() {
@@ -140,10 +145,7 @@ export default function CreateCheckin() {
                   placeholder="Start time"
                   type="time"
                   {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onChangeStartTime(e.currentTarget.value);
-                  }}
+                  onBlur={(e) => onChangeStartTime(e.currentTarget.value)}
                 />
               </FormControl>
               <FormMessage />
@@ -157,7 +159,8 @@ export default function CreateCheckin() {
               placeholder="End time"
               value={endTime}
               type="time"
-              onChange={(e) => onChangeEndTime(e.currentTarget.value)}
+              onChange={(e) => setEndTime(e.currentTarget.value)}
+              onBlur={(e) => onChangeEndTime(e.currentTarget.value)}
             />
           </FormControl>
           <FormMessage />
@@ -172,8 +175,12 @@ export default function CreateCheckin() {
                 <Input
                   placeholder="Duration"
                   type="number"
+                  step="any"
                   min={0.0}
                   {...field}
+                  onBlur={(e) =>
+                    onChangeDuration(parseFloat(e.currentTarget.value))
+                  }
                 />
               </FormControl>
               <FormMessage />
