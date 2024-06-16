@@ -14,6 +14,19 @@ CREATE TABLE `time-machine-next_account` (
 	FOREIGN KEY (`userId`) REFERENCES `time-machine-next_user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `time-machine-next_checkin` (
+	`id` text(24) PRIMARY KEY NOT NULL,
+	`user_id` text(24) NOT NULL,
+	`created` integer DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated` integer NOT NULL,
+	`duration` real NOT NULL,
+	`start_time` text(5) NOT NULL,
+	`record_date` text(10) NOT NULL,
+	`tag` text(255) NOT NULL,
+	`activities` text(255) NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `time-machine-next_user`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `time-machine-next_post` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text(256),

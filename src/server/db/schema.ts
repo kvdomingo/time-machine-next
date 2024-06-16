@@ -1,14 +1,15 @@
+import { type AdapterAccount } from "next-auth/adapters";
+
+import { init } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
   int,
-  real,
   primaryKey,
+  real,
   sqliteTableCreator,
   text,
 } from "drizzle-orm/sqlite-core";
-import { type AdapterAccount } from "next-auth/adapters";
-import { init } from "@paralleldrive/cuid2";
 
 const createId = init({
   length: 24,
@@ -55,6 +56,7 @@ export const users = createTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  checkins: many(checkins),
 }));
 
 export const accounts = createTable(
@@ -118,15 +120,22 @@ export const verificationTokens = createTable(
   }),
 );
 
-export const checkin = createTable("checkin", {
+export const checkins = createTable("checkin", {
   id: text("id", { length: 24 }).notNull().primaryKey().$defaultFn(createId),
+  user_id: text("user_id", { length: 24 })
+    .notNull()
+    .references(() => users.id),
   created: int("created", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updated: int("updated", { mode: "timestamp" }),
-  duration: real("duration"),
-  start_time: text("start_time", { length: 5 }),
-  record_date: text("record_date", { length: 10 }),
-  tag: text("tag", { length: 255 }),
-  activities: text("activities", { length: 255 }),
+  updated: int("updated", { mode: "timestamp" }).notNull(),
+  duration: real("duration").notNull(),
+  start_time: text("start_time", { length: 5 }).notNull(),
+  record_date: text("record_date", { length: 10 }).notNull(),
+  tag: text("tag", { length: 255 }).notNull(),
+  activities: text("activities", { length: 255 }).notNull(),
 });
+
+export const checkinsRelations = relations(checkins, ({ one }) => ({
+  user: one(users, { fields: [checkins.user_id], references: [users.id] }),
+}));
