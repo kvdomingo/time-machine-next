@@ -12,7 +12,7 @@ export type CreateCheckinSchema = z.infer<typeof CreateCheckinSchema>;
 
 export const CheckinSchema = CreateCheckinSchema.extend({
   id: z.string().min(1).max(24),
-  user_id: z.string().min(1).max(24),
+  created_by_id: z.string().min(1).max(24),
   created: z.date(),
   updated: z.date(),
 });
